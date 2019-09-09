@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration debug="false" scan="false">
+    <springProperty scop="context" name="spring.application.name" source="spring.application.name" defaultValue="fy"/>
+    <springProperty scop="context" name="logging.level.root" source="logging.level.root" defaultValue="DEBUG"/>
+    <springProperty scop="context" name="logging.level.root.com.fy" source="logging.level.root.com.fy" defaultValue="DEBUG"/>
+    <springProperty scop="context" name="app.logstash.tcp.url" source="app.logstash.tcp.url" defaultValue="172.31.215.25:9000"/>
+    <property name="app.logstash.tcp.url" value="${app.logstash.tcp.url}" />
+    <property name="log.path" value="logs/${spring.application.name}" />
+    <property name="log.level" value="${logging.level.root}" />
+    <property name="log.level.service" value="${logging.level.root.com.fy}" />
+
+    <!-- Console log output -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{MM-dd HH:mm:ss.SSS} %-5level [%logger{50}] - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="debug" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator>
+            <key>tenant</key>
+            <defaultValue>start</defaultValue>
+        </discriminator>
+        <sift>
+            <!-- Log file debug output -->
+		    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		        <file>${log.path}/${tenant}_debug.log</file>
+		        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+		            <fileNamePattern>${log.path}/%d{yyyy-MM}/debug.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+		            <maxFileSize>150MB</maxFileSize>
+		            <maxHistory>30</maxHistory>
+		        </rollingPolicy>
+		        <encoder>
+		            <pattern>%date [%thread] %-5level [%logger{50}] %file:%line - %msg%n</pattern>
+		        </encoder>
+		    </appender>
+        </sift>
+    </appender>
+
+
+	<appender name="error" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator>
+            <key>tenant</key>
+            <defaultValue>start</defaultValue>
+        </discriminator>
+        <sift>
+		    <!-- Log file error output -->
+		    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		        <file>${log.path}/${tenant}_error.log</file>
+		        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+		            <fileNamePattern>${log.path}/%d{yyyy-MM}/error.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+		            <maxFileSize>150MB</maxFileSize>
+		            <maxHistory>30</maxHistory>
+		        </rollingPolicy>
+		        <encoder>
+		            <pattern>%date [%thread] %-5level [%logger{50}] %file:%line - %msg%n</pattern>
+		        </encoder>
+		        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+		            <level>ERROR</level>
+		        </filter>
+		    </appender>
+        </sift>
+    </appender>
+
+    <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>${app.logstash.tcp.url}</destination>
+        <encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder" />
+    </appender>
+
+    <logger name="com.fy.service.statistics" level="${log.level.service}" />
+    <!-- Level: FATAL 0  ERROR 3  WARN 4  INFO 6  DEBUG 7 -->
+    <root level="${log.level}">
+        <appender-ref ref="console"/>
+        <appender-ref ref="logstash"/>
+        <appender-ref ref="debug" />
+        <appender-ref ref="error" />
+    </root>
+</configuration>

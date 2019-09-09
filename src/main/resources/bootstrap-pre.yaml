@@ -1,0 +1,7 @@
+spring:
+  profiles:    active: pre
+  cloud:
+    nacos:
+      config:
+       namespace: d4a008db-fcc5-4144-8660-d48cae5580c8
+ 

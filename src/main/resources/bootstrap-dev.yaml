@@ -1,0 +1,7 @@
+spring:
+  profiles:    active: dev
+  cloud:
+    nacos:
+      config:
+       namespace: 2d6bd89e-6ce2-48b9-b3b8-e6db34e8cdbe
+ 

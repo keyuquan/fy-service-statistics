@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: fy-service-statistics-server
+  cloud:
+    nacos:
+      config:
+       file-extension: yaml
+       server-addr: ${fy-config-server:10.10.95.43:8848}
+       group: fy-service
+       ext-config:
+         - data-id: fy-system-common.yaml
+           group: fy-service
+           refresh: true
+
+server:
+  port: 8014
+
